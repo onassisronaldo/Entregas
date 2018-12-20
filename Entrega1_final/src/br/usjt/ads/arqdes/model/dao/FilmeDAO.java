@@ -7,19 +7,36 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import br.usjt.ads.arqdes.model.entity.Filme;
 import br.usjt.ads.arqdes.model.entity.Genero;
 import br.usjt.ads.arqdes.model.service.GeneroService;
 
+@Repository
 public class FilmeDAO {
+	
+	Connection conn;
+	
+	@Autowired
+	public FilmeDAO(DataSource data) throws IOException {
+		try {
+			conn = data.getConnection();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new IOException(e);
+		}
+	}
 	
 	public int inserirFilme(Filme filme) throws IOException {
 		int id = -1;
 		String sql = "insert into Filme (titulo, descricao, diretor, posterpath, "
 				+ "popularidade, data_lancamento, id_genero) values (?,?,?,?,?,?,?)";
 		
-		try(Connection conn = ConnectionFactory.getConnection();
-			PreparedStatement pst = conn.prepareStatement(sql);){
+		try(PreparedStatement pst = conn.prepareStatement(sql);){
 			
 			pst.setString(1, filme.getTitulo());
 			pst.setString(2, filme.getDescricao());
@@ -53,8 +70,7 @@ public class FilmeDAO {
 		ArrayList<Filme> filmes = new ArrayList<>();
 		String sql = "SELECT id, titulo, descricao, diretor, posterpath, popularidade, data_lancamento, id_genero from FILME order by popularidade DESC";
 
-		try (Connection conn = ConnectionFactory.getConnection();
-				PreparedStatement pst = conn.prepareStatement(sql);
+		try (PreparedStatement pst = conn.prepareStatement(sql);
 				ResultSet rs = pst.executeQuery();) {
 
 			while (rs.next()) {
@@ -88,8 +104,7 @@ public class FilmeDAO {
 		Genero genero = new Genero();
 		int idGenero;
 		GeneroService gs = new GeneroService();
-		try (Connection conn = ConnectionFactory.getConnection(); 
-				PreparedStatement pst = conn.prepareStatement(sql);) {
+		try (PreparedStatement pst = conn.prepareStatement(sql);) {
 
 			pst.setInt(1, id);
 			try (ResultSet rs = pst.executeQuery();) {
@@ -125,8 +140,7 @@ public class FilmeDAO {
 				+ "f. popularidade, f.data_lancamento, f.id_genero, g.nome "
 				+ "from filme f, genero g "
 				+ "where f.id_genero = g.id and upper(f.titulo) like ?";
-		try(Connection conn = ConnectionFactory.getConnection();
-			PreparedStatement pst = conn.prepareStatement(sql);){
+		try(PreparedStatement pst = conn.prepareStatement(sql);){
 			
 			pst.setString(1, "%" + chave.toUpperCase() + "%");
 		
@@ -163,9 +177,8 @@ public class FilmeDAO {
 				+ "f. popularidade, f.data_lancamento, f.id_genero, g.nome "
 				+ "from filme f, genero g "
 				+ "where f.id_genero = g.id";
-		try(Connection conn = ConnectionFactory.getConnection();
-			PreparedStatement pst = conn.prepareStatement(sql);
-			ResultSet rs = pst.executeQuery();){
+		try(PreparedStatement pst = conn.prepareStatement(sql);
+				ResultSet rs = pst.executeQuery();){
 			
 			Filme filme;
 			Genero genero;
@@ -193,8 +206,7 @@ public class FilmeDAO {
 	public void alterarFilme(Filme filme) {
 		String sqlUpdate = "UPDATE FILME SET titulo = ?, descricao = ?, diretor = ?, posterpath = ?, popularidade = ?, data_lancamento = ?, id_genero = ? WHERE id = ?";
 		
-		try (Connection conn = ConnectionFactory.getConnection();
-				PreparedStatement stm = conn.prepareStatement(sqlUpdate);) {
+		try (PreparedStatement stm = conn.prepareStatement(sqlUpdate);) {
 			
 			stm.setString(1, filme.getTitulo());
 			stm.setString(2, filme.getDescricao());
@@ -215,8 +227,7 @@ public class FilmeDAO {
 	}
 	public void excluirFilme(int id) throws IOException{
 		String sql = "DELETE FROM filme WHERE id = ?";
-		try(Connection conn = ConnectionFactory.getConnection();
-					PreparedStatement pst = conn.prepareStatement(sql);){
+		try(PreparedStatement pst = conn.prepareStatement(sql);){
 			pst.setInt(1, id);
 			pst.execute();
 		} catch(SQLException e){

@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -114,13 +116,17 @@ public class ManterFilmesController {
 	
 	
 	@RequestMapping("/inserir_filme")
-	public String inserirFilme(Filme filme, Model model) {
+	public String inserirFilme(@Valid Filme filme, BindingResult result, Model model) {
 		try {
-			Genero genero = gService.buscarGenero(filme.getGenero().getId());
-			filme.setGenero(genero);
-			model.addAttribute("filme", filme);
-			fService.inserirFilme(filme);
-			return "VisualizarFilme";
+			if(!result.hasFieldErrors("titulo")) {
+				Genero genero = gService.buscarGenero(filme.getGenero().getId());
+				filme.setGenero(genero);
+				model.addAttribute("filme", filme);
+				fService.inserirFilme(filme);
+				return "VisualizarFilme";
+			} else {
+				return "CriarFilme";
+			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
