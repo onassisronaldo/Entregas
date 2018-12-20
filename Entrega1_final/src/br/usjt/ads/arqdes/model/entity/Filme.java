@@ -2,19 +2,41 @@ package br.usjt.ads.arqdes.model.entity;
 
 import java.util.Date;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+@Entity
+@Table(name="Filme")
 public class Filme {
+	@Id
+	@Column(name="id")
+	@NotNull
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	@NotNull
 	@Size(max=100, min=2, message="O título do filme deve ter pelo menos 2 caracteres.")
 	private String titulo;
+	@Size(max=4000)
 	private String descricao;
 	private double popularidade;
+	@Temporal(TemporalType.DATE)
 	private Date dataLancamento;
+	@Size(max=2000)
 	private String posterPath;
+	@Size(max=60)
 	private String diretor;
+	@ManyToOne
+	@JoinColumn(name="id_genero")
 	private Genero genero;
 	
 	public int getId() {

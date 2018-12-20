@@ -2,6 +2,7 @@ package br.usjt.ads.arqdes.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -45,7 +46,7 @@ public class ManterFilmesController {
 	@RequestMapping("/novo_filme")
 	public String novoFilme(HttpSession session){
 		try {
-			ArrayList<Genero> generos = gService.listarGeneros();
+			List<Genero> generos = gService.listarGeneros();
 			session.setAttribute("generos", generos);
 			 return "CriarFilme";
 		} catch (IOException e) {
@@ -86,7 +87,7 @@ public class ManterFilmesController {
 	@RequestMapping("/catalogo_popularidade")
 	public String catalogoPopularidade(Model model) {
 		try {
-			ArrayList<Filme> lista;
+			List<Filme> lista;
 			lista = fService.buscarFilmePopularidade();
 			model.addAttribute("lista", lista);
 			return "CatalogoPopularidade";
@@ -100,7 +101,7 @@ public class ManterFilmesController {
 	@RequestMapping("/tela_alterar")
 	public String telaAlterar(Filme filme, Model model, @RequestParam int id, HttpSession session) {
 		try {
-			ArrayList<Genero> generos = gService.listarGeneros();
+			List<Genero> generos = gService.listarGeneros();
 			filme = fService.buscarFilme(filme.getId());
 			model.addAttribute("filme", filme);
 			model.addAttribute("generos", generos);
@@ -155,7 +156,7 @@ public class ManterFilmesController {
 	public String buscarFilmes(HttpSession session, @RequestParam String chave) {
 		
 		try {
-			ArrayList<Filme> lista;
+			List<Filme> lista;
 			
 			if (chave != null && chave.length() > 0) {
 				lista = fService.listarFilmes(chave);

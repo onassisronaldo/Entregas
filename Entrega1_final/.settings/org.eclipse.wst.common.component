@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
-    <wb-module deploy-name="Entrega4_final">
+    <wb-module deploy-name="Entrega5_final">
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
-        <property name="java-output-path" value="/Entrega4_final/build/classes"/>
-        <property name="context-root" value="Entrega4_final"/>
+        <property name="java-output-path" value="/Entrega5_final/build/classes"/>
+        <property name="context-root" value="Entrega5_final"/>
     </wb-module>
 </project-modules>
