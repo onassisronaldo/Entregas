@@ -11,12 +11,7 @@ import br.usjt.ads.arqdes.model.entity.Filme;
 import br.usjt.ads.arqdes.model.entity.Genero;
 import br.usjt.ads.arqdes.model.service.GeneroService;
 
-
 public class FilmeDAO {
-	private GeneroService gs;
-	private Genero genero;
-	private Filme filme;
-	private int idGenero;
 	
 	public int inserirFilme(Filme filme) throws IOException {
 		int id = -1;
@@ -54,33 +49,45 @@ public class FilmeDAO {
 		}
 		return id;
 	}
-	
-	public void atualizar(Filme filme) {
-		String sqlUpdate = "UPDATE FILME SET titulo = ?, descricao = ?, diretor = ?, posterpath = ?, popularidade = ?, data_lancamento = ?, id_genero = ? WHERE id = ?";
-		
+	public ArrayList<Filme> buscarFilmePopularidade() throws IOException {
+		ArrayList<Filme> filmes = new ArrayList<>();
+		String sql = "SELECT id, titulo, descricao, diretor, posterpath, popularidade, data_lancamento, id_genero from FILME order by popularidade DESC";
+
 		try (Connection conn = ConnectionFactory.getConnection();
-				PreparedStatement stm = conn.prepareStatement(sqlUpdate);) {
-			
-			stm.setString(1, filme.getTitulo());
-			stm.setString(2, filme.getDescricao());
-			stm.setString(3, filme.getDiretor());
-			stm.setString(4, filme.getPosterPath());
-			stm.setDouble(5, filme.getPopularidade());
-			if(filme.getDataLancamento() != null) {
-				stm.setDate(6, new java.sql.Date(filme.getDataLancamento().getTime()));
-			} else {
-				stm.setDate(6,  null);
+				PreparedStatement pst = conn.prepareStatement(sql);
+				ResultSet rs = pst.executeQuery();) {
+
+			while (rs.next()) {
+				GeneroService gs = new GeneroService();
+				int idGenero;
+				Filme filme = new Filme();
+				Genero genero = new Genero();
+				filme.setId(rs.getInt("id"));
+				filme.setTitulo(rs.getString("titulo"));
+				filme.setDescricao(rs.getString("descricao"));
+				filme.setDiretor(rs.getString("diretor"));
+				filme.setPosterPath(rs.getString("posterpath"));
+				filme.setPopularidade(rs.getDouble("popularidade"));
+				filme.setDataLancamento(rs.getDate("data_lancamento"));
+				genero.setId(rs.getInt("id_genero"));
+				idGenero = genero.getId();
+				genero = gs.buscarGenero(idGenero);
+				filme.setGenero(genero);
+				
+				filmes.add(filme);
 			}
-			stm.setInt(7, filme.getGenero().getId());
-			stm.setInt(8, filme.getId());
-			stm.execute();
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
+			throw new IOException(e);
 		}
+		return filmes;
 	}
-	public Filme buscarFilme(int id) throws IOException {
+	public Filme buscarFilme(int id) throws IOException{
 		String sql = "SELECT id, titulo, descricao, diretor, posterpath, popularidade, data_lancamento, id_genero FROM FILME WHERE id = ?";
-		gs = new GeneroService();
+		Filme filme = new Filme();
+		Genero genero = new Genero();
+		int idGenero;
+		GeneroService gs = new GeneroService();
 		try (Connection conn = ConnectionFactory.getConnection(); 
 				PreparedStatement pst = conn.prepareStatement(sql);) {
 
@@ -183,13 +190,36 @@ public class FilmeDAO {
 		return lista;
 	}
 	
-	public void excluir(int id) {
-		String sqlDelete = "DELETE FROM FILME WHERE id = ?";
+	public void alterarFilme(Filme filme) {
+		String sqlUpdate = "UPDATE FILME SET titulo = ?, descricao = ?, diretor = ?, posterpath = ?, popularidade = ?, data_lancamento = ?, id_genero = ? WHERE id = ?";
+		
 		try (Connection conn = ConnectionFactory.getConnection();
-				PreparedStatement stm = conn.prepareStatement(sqlDelete);) {
-			stm.setInt(1, id);
+				PreparedStatement stm = conn.prepareStatement(sqlUpdate);) {
+			
+			stm.setString(1, filme.getTitulo());
+			stm.setString(2, filme.getDescricao());
+			stm.setString(3, filme.getDiretor());
+			stm.setString(4, filme.getPosterPath());
+			stm.setDouble(5, filme.getPopularidade());
+			if(filme.getDataLancamento() != null) {
+				stm.setDate(6, new java.sql.Date(filme.getDataLancamento().getTime()));
+			} else {
+				stm.setDate(6,  null);
+			}
+			stm.setInt(7, filme.getGenero().getId());
+			stm.setInt(8, filme.getId());
 			stm.execute();
 		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	public void excluirFilme(int id) throws IOException{
+		String sql = "DELETE FROM filme WHERE id = ?";
+		try(Connection conn = ConnectionFactory.getConnection();
+					PreparedStatement pst = conn.prepareStatement(sql);){
+			pst.setInt(1, id);
+			pst.execute();
+		} catch(SQLException e){
 			e.printStackTrace();
 		}
 	}

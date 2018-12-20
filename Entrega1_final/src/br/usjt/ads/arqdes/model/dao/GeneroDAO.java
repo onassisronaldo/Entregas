@@ -10,9 +10,10 @@ import java.util.ArrayList;
 import br.usjt.ads.arqdes.model.entity.Genero;
 
 public class GeneroDAO {
-	private Genero genero;
+
 	public Genero buscarGenero(int id) throws IOException {
-		String sql = "select nome from GENERO where id=?";
+		Genero genero = null;
+		String sql = "select id, nome from genero where id=?";
 
 		try (Connection conn = ConnectionFactory.getConnection(); 
 				PreparedStatement pst = conn.prepareStatement(sql);) {
@@ -30,7 +31,6 @@ public class GeneroDAO {
 			e.printStackTrace();
 			throw new IOException(e);
 		}
-		
 		return genero;
 	}
 
