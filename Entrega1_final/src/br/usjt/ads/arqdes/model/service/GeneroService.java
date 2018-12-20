@@ -9,7 +9,7 @@ import br.usjt.ads.arqdes.model.entity.Genero;
 public class GeneroService {
 	private GeneroDAO dao;
 	
-	public GeneroService() {
+	public GeneroService() throws IOException{
 		this.dao = new GeneroDAO();
 	}
 	

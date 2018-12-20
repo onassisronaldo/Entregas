@@ -12,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import br.usjt.ads.arqdes.model.entity.Filme;
 import br.usjt.ads.arqdes.model.entity.Genero;
@@ -27,98 +28,151 @@ public class ManterFilmesController extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
+		request.setCharacterEncoding("UTF-8");
 		String acao = request.getParameter("acao");
 		RequestDispatcher dispatcher;
 		FilmeService fService;
 		GeneroService gService;
 		Filme filme;
+		Genero genero;
+		DateFormat formatter;
+		ArrayList<Genero> generos;
+		HttpSession session;
+
+		String titulo = request.getParameter("titulo");
+		String descricao = request.getParameter("descricao");
+		String diretor = request.getParameter("diretor");
+		String posterPath = request.getParameter("posterPath");
+		String popularidade = request.getParameter("popularidade") == null
+				|| request.getParameter("popularidade").length() == 0 ? "0" : request.getParameter("popularidade");
+		String dataLancamento = request.getParameter("dataLancamento") == null
+				|| request.getParameter("dataLancamento").length() == 0 ? ""
+						: request.getParameter("dataLancamento");
+		String idGenero = request.getParameter("genero.id");
+		String chave = request.getParameter("data[search]");
+		String idFilme = request.getParameter("id");
+		FilmeService fs = new FilmeService();
 		
 		switch (acao) {
-		case "inserir":
-			fService = new FilmeService();
+		case "alterar":
 			filme = new Filme();
-			filme.setTitulo("O Náufrago");
-			filme.setDescricao("Chuck Noland (Tom Hanks) um inspetor da Federal Express (FedEx), "
-					+ "multinacional encarregada de enviar cargas e correspondências, que tem por "
-					+ "função checar vários escritórios da empresa pelo planeta. Porém, em uma de "
-					+ "suas costumeiras viagens ocorre um acidente, que o deixa preso em uma ilha "
-					+ "completamente deserta por 4 anos. Com sua noiva (Helen Hunt) e seus amigos "
-					+ "imaginando que ele morrera no acidente, Chuck precisa lutar para sobreviver, "
-					+ "tanto fisicamente quanto emocionalmente, a fim de que um dia consiga retornar "
-					+ "civilização.");
-			filme.setDiretor("Robert Zemeckis");
+			filme.setId(Integer.parseInt(idFilme));
+			filme.setTitulo(titulo);
+			System.out.println(filme.getTitulo());
+			filme.setDescricao(descricao);
+			filme.setDiretor(diretor);
 
-			Genero genero = new Genero();
-			genero.setId(12);
-			genero.setNome("Aventura");
+			gService = new GeneroService();
+			genero = new Genero();
+			genero.setId(Integer.parseInt(idGenero));
+			genero.setNome(gService.buscarGenero(genero.getId()).getNome());
 			filme.setGenero(genero);
 
-			DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+			formatter = new SimpleDateFormat("dd/MM/yyyy");
 			try {
-				filme.setDataLancamento(formatter.parse("26/01/2001"));
+				filme.setDataLancamento(formatter.parse(dataLancamento));
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				filme.setDataLancamento(null);
 			}
 
-			filme.setPopularidade(100.25);
-			filme.setPosterPath("img/naufrago.jpg");
+			filme.setPopularidade(Double.parseDouble(popularidade));
+			filme.setPosterPath(posterPath);
+			
+			fs.atualizarFilme(filme);
+			
+			dispatcher = request.getRequestDispatcher("index.jsp");
+			dispatcher.forward(request, response);
+			
+			break;
+		case "editar":
+			filme = fs.buscarFilme(Integer.parseInt(idFilme));
+			gService = new GeneroService();
+			generos = gService.listarGeneros();
+			session = request.getSession();
+			session.setAttribute("generos", generos);
+			request.setAttribute("filme", filme);
+			dispatcher = request.getRequestDispatcher("AlterarFilme.jsp");
+			dispatcher.forward(request, response);
+			
+			break;
+		case "Excluir":
+			fs.excluirFilme(Integer.parseInt(idFilme));
+			dispatcher = request.getRequestDispatcher("index.jsp");
+			dispatcher.forward(request, response);
+			break;
+		case "visualizar":	
+			
+			filme = fs.buscarFilme(Integer.parseInt(idFilme));
+			request.setAttribute("filme", filme);
+			dispatcher = request.getRequestDispatcher("VisualizarFilme.jsp");
+			dispatcher.forward(request, response);
+			
+			break;
+		case "novo":
+			gService = new GeneroService();
+			generos = gService.listarGeneros();
+			session = request.getSession();
+			session.setAttribute("generos", generos);
+			dispatcher = request.getRequestDispatcher("CriarFilme.jsp");
+			dispatcher.forward(request, response);
+			break;
+		case "criar":
+			
+
+			fService = new FilmeService();
+			filme = new Filme();
+			filme.setTitulo(titulo);
+			filme.setDescricao(descricao);
+			filme.setDiretor(diretor);
+
+			gService = new GeneroService();
+			genero = new Genero();
+			genero.setId(Integer.parseInt(idGenero));
+			genero.setNome(gService.buscarGenero(genero.getId()).getNome());
+			filme.setGenero(genero);
+
+			formatter = new SimpleDateFormat("dd/MM/yyyy");
+			try {
+				filme.setDataLancamento(formatter.parse(dataLancamento));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				filme.setDataLancamento(null);
+			}
+
+			filme.setPopularidade(Double.parseDouble(popularidade));
+			filme.setPosterPath(posterPath);
 
 			filme = fService.inserirFilme(filme);
 
 			request.setAttribute("filme", filme);
 
-			dispatcher = request.getRequestDispatcher("MostrarFilme.jsp");
-			dispatcher.forward(request, response);
-			break;
-		case "generos":
-			gService = new GeneroService();
-			ArrayList<Genero> generos = gService.listarGeneros();
-			request.setAttribute("generos", generos);
-
-			dispatcher = request.getRequestDispatcher("MostrarGeneros.jsp");
+			dispatcher = request.getRequestDispatcher("VisualizarFilme.jsp");
 			dispatcher.forward(request, response);
 			break;
 		case "buscar":
-			int id1 = Integer.parseInt(request.getParameter("id"));
-			fService = new FilmeService();
-			filme = fService.buscarFilme(id1);
-			request.setAttribute("filme", filme);
 
-			dispatcher = request.getRequestDispatcher("MostrarFilme.jsp");
+		case "reiniciar":
+			session = request.getSession();
+			session.setAttribute("lista", null);
+			dispatcher = request.getRequestDispatcher("ListarFilmes.jsp");
 			dispatcher.forward(request, response);
 			break;
-		case "excluir":
-			int idFilme = Integer.parseInt(request.getParameter("idFilme"));
-			System.out.println(idFilme + "adaJSDKJAJKDJKjkaskjdjkaJKSDKJAJKSDJKAKSJD");
+		case "listar":
+			session = request.getSession();
 			fService = new FilmeService();
-			fService.excluirFilme(idFilme);
-			
-			dispatcher = request.getRequestDispatcher("index.jsp");
+			ArrayList<Filme> lista;
+			if (chave != null && chave.length() > 0) {
+				lista = fService.listarFilmes(chave);
+			} else {
+				lista = fService.listarFilmes();
+			}
+			session.setAttribute("lista", lista);
+			dispatcher = request.getRequestDispatcher("ListarFilmes.jsp");
 			dispatcher.forward(request, response);
-			break;
-		case "alterar":
-			int id3 = Integer.parseInt(request.getParameter("idFilme"));
-			fService = new FilmeService();
-			filme = new Filme();
-			genero = new Genero();
-			
-			ArrayList<Genero> lista = new ArrayList<>();
-			gService = new GeneroService();
-			lista = gService.listarGeneros();
-			
-			filme = fService.buscarFilme(id3);
-			
-			request.setAttribute("filme", filme);
-			request.setAttribute("lista", lista);
-			
-			dispatcher = request.getRequestDispatcher("AlterarFilme.jsp");
-			dispatcher.forward(request, response);
-			break;
 		}
-
 
 	}
 

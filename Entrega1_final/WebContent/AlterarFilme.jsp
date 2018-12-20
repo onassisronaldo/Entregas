@@ -1,35 +1,81 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="pt-br">
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Hora da Pipoca</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Alterar Filme</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
+
 <body>
-	<form action="manterfilmes.do" method="get">
-		<h3>Titulo:</h3>
-		<input type="text" name="titulo" value="${filme.titulo }"/>
-		<h3>Descricao:</h3>
-		<textarea type="text" name="descricao" value="${filme.descricao }" rows="4" cols="50"></textarea>
-		<h3>Diretor:</h3>
-		<input type="text" name="diretor" value="${filme.diretor }"/>
-		<h3>PosterPath:</h3>
-		<input type="text" name="posterpath" value="${filme.posterPath }"/>
-		<h3>Popularidade:</h3>
-		<input type="text" name="popularidade" value="${filme.popularidade }"/>
-		<h3>Data de Lançamento:</h3>
-		<input type="text"	name="data_lancamento" value="${filme.dataLancamento }"/>
-		<h3>Genero:</h3>
-		<select type="text" >
-			<c:forEach var="genero" items="${lista}">
-				<option name="genero" value="${genero.id }">${genero.nome }</option>
-			</c:forEach>
-		</select>
-		<input type="submit" name="acao" value="alterarFilme"/>
-	</form>
-	
+    <!-- Barra superior com os menus de navegação -->
+	<c:import url="Menu.jsp"/>
+    <!-- Container Principal -->
+    <div id="main" class="container">
+        <h3 class="page-header">Editar Filme</h3>
+        <!-- Formulario para inclusao de clientes -->
+        <form action="manterfilmes.do" method="post">
+            <!-- area de campos do form -->
+            <div class="row">
+            		<div class="form-group col-md-4">
+                    <label for="genero">Gênero</label>
+                    <select class="form-control" name="genero.id" id="genero">
+                    		<option value="${filme.genero.id }">${filme.genero.nome }</option>
+                    		<c:forEach var="genero" items="${generos}">
+                    		<option value="${genero.id}">${genero.nome}</option>
+                    		</c:forEach>
+                    </select>
+                </div>
+                <div class="form-group col-md-8">
+                    <label for="titulo">Título</label>
+                    <input type="text" class="form-control" name="titulo" id="titulo" required maxlength="100" placeholder="nome do filme" value="${filme.titulo}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <label for="descricao">Descrição</label>
+    				    <textarea class="form-control rounded-0" id="descricao" name ="descricao" maxlength="4000" rows="10" value="${filme.descricao}"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-8">
+                    <label for="diretor">Direção</label>
+                    <input type="text" class="form-control" name="diretor" id="diretor" maxlength="60" placeholder="nome do(s) diretor(es)" value="${filme.diretor }">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="dataLancamento">Lançamento</label>
+                    <input type="text" class="form-control" name="dataLancamento" id="dataLancamento" placeholder="formato dd/mm/yyyy" value="${filme.dataLancamento }">
+                </div>
+            </div>
+            <div class="row">
+            	    <div class="form-group col-md-8">
+                    <label for="posterpath">Poster</label>
+                    <input type="text" class="form-control" name="posterPath" id="posterpath" maxlength="200" placeholder="caminho da imagem do poster" value="${filme.posterPath }">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="popularidade">Popularidade</label>
+                    <input type="number" class="form-control" name="popularidade" id="popularidade" min="0.0" max="100.0" value="${filme.popularidade }">
+                </div>
+            </div>
+            <hr />
+            <div id="actions" class="row">
+                <div class="col-md-12">
+                	<input type="hidden" name="id" value="${filme.id}" />
+                    <button type="submit" class="btn btn-primary" name="acao" value="alterar">Alterar</button>
+                    <a href="index.jsp" class="btn btn-default">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
 </body>
+
 </html>
